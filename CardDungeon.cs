@@ -5,6 +5,10 @@ using Microsoft.VisualBasic;
 using static System.Console;
 namespace CardDungeon;
 
+public static class Global{
+    public static bool testing = false;
+}
+
 public class Input{
     public static bool BoolInput(string word_true, string word_false){
         bool flag = true;
@@ -124,7 +128,6 @@ public class Input{
 class Program{
     static void Main(string[] args){
         // starting game
-        bool testing = true;
         Actor player = new("Player");
         player.cards = Deck.GetInstance().GetCards(6);
         Random rnd = new();
@@ -156,17 +159,19 @@ class Program{
             int y = 0;
             while (player.hp > 0){
                 // input
-                //WriteLine("x "+(x+1) + " y " + (y+1));
-                //WriteLine(Deck.GetInstance().cards.Count);
+                if (Global.testing){
+                    WriteLine("x "+(x+1) + " y " + (y+1));
+                    WriteLine(Deck.GetInstance().cards.Count);
+                }
                 var input = ReadLine();
                 if (input == "show"){
                     player.ShowCards();
                     WriteLine("");
                     continue;
                 } else if (input == "test") {
-                    testing = true;
+                    Global.testing = true;
                     continue;
-                } else if (input == "map" && testing) {
+                } else if (input == "map") {
                     Input.ShowLevel(rooms, x, y);
                     continue;
                 } else if (input == "a" && x > 0) {

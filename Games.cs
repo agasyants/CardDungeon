@@ -155,6 +155,9 @@ public class Fool: MiniGames {
             // enemy turn
             } else {
                 Actor enemy = enemies[index-1];
+                if (Global.testing){
+                    enemy.ShowCards();
+                }
                 if (table.Count == 0){
                     // enemy attack
                     WriteLine(enemy.name + " turn");
