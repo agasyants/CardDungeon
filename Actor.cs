@@ -36,7 +36,7 @@ public class Actor(string name)
     }
     public void ShowCards(){
         for (int i = 0; i < cards.Count; i++){
-            Console.WriteLine(i+1 + ". " + cards[i].rank + " of " + cards[i].suit);
+            Console.WriteLine(i+1 + ". " + cards[i].rank + " of " + Input.HighlightTrump(cards[i].suit));
         }
     }
     public void GetDamage(List<Card> cards, int multiplier){

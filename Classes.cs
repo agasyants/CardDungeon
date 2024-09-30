@@ -90,14 +90,17 @@ public class Room{
     public RoomType roomType = RoomType.Empty;
     public List<Actor> enemies = [];
     public Chest? chest;
+    public string map_tag = " ";
     private MiniGames game;
     public Room(MiniGames game){
         this.game = game;
         Random rnd = new();
         int num = rnd.Next(0, 10);
         if (num == 0){
+            map_tag = "A";
             roomType = RoomType.Altar;
         } else if (num >= 1 && num < 5){
+            map_tag = "E";
             roomType = RoomType.Enemy;
             Actor enemy = new("Skeleton");
             enemy.armor = 0;
@@ -110,11 +113,10 @@ public class Room{
                 enemies.Add(enemy2);
             }
         } else if (num >= 7){
+            map_tag = "C";
             chest = new Chest();
             roomType = RoomType.Chest;
-        } else {
-            roomType = RoomType.Empty;
-        } 
+        }
     }
   
     public bool EnterRoom(Actor player){

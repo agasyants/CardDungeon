@@ -77,7 +77,6 @@ abstract public class MiniGames {
 
 public class Fool: MiniGames {
     public override void StartGame(Actor player, List<Actor> enemies) {
-        WriteLine("Trump: " + Deck.GetInstance().trump);
         // who first
         foreach (Actor enemy in enemies){
             enemy.cards = Deck.GetInstance().GetCards(6);
@@ -97,7 +96,7 @@ public class Fool: MiniGames {
         while (player.hp > 0 && SumEnemiessHP(enemies)){
             // player turn
             if (index == 0){
-                // putting cards on the table
+                // player attack
                 Input.ShowCards("Cards on the table:", table);
                 if (table.Count == 0){
                     PrintHP(enemies);
@@ -116,6 +115,7 @@ public class Fool: MiniGames {
                         }
                     } WriteLine();
                 } else {
+                    // player defend
                     WriteLine("Your cards: ");
                     player.ShowCards();
                     int n = table.Count;
@@ -156,6 +156,7 @@ public class Fool: MiniGames {
             } else {
                 Actor enemy = enemies[index-1];
                 if (table.Count == 0){
+                    // enemy attack
                     WriteLine(enemy.name + " turn");
                     // check if had same cards
                     // dictionary
@@ -167,6 +168,7 @@ public class Fool: MiniGames {
                     enemy.cards.RemoveAt(num);
                     index = UpdateIndex(index, enemies.Count);
                 } else {
+                    // enemy defend
                     int num = (int)table[0].rank;
                     bool flag = true;
                     // add cards
@@ -227,18 +229,20 @@ public class Fool: MiniGames {
                     }
                 } Input.ProgramSays([]);
             } 
-        } if (player.hp <= 0){
+        if (player.hp <= 0)
             WriteLine("You died");
-        } else {
+        else {
             foreach (Actor enemy in enemies){
                 if (enemy.hp <= 0){
                     WriteLine(enemy.name + " died");
                     Deck.GetInstance().RerurnCards(enemy.cards);
+                    enemies.Remove(enemy);
                     enemy.cards = [];
                 }
             } 
-            player.cards.AddRange(Deck.GetInstance().GetCards(2));
-            WriteLine("You win the fight!!!");
+        }
+        player.cards.AddRange(Deck.GetInstance().GetCards(2));
+        WriteLine("You win the fight!!!");
         }
     }
 }
