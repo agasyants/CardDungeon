@@ -89,6 +89,16 @@ public class Input{
             }
         } return result;
     }
+    public static void ClearLevel(Room[,] rooms){
+        for (int i = 0; i < rooms.GetLength(0); i++){
+            for (int j = 0; j < rooms.GetLength(1); j++){
+                Chest? chest = rooms[i, j].chest;
+                if (chest != null){
+                    chest.ResetChest();
+                }
+            }
+        }
+    }
 }
 class Program{
     static void Main(string[] args){
@@ -102,7 +112,7 @@ class Program{
         WriteLine();
         for (int level_number = 1; level_number < 15; level_number++)
         {
-            player.armor = 50;
+            player.armor = 80;
             Room[,] rooms = new Room[n, m];
             for (int i = 0; i < n; i++){
                 for (int j = 0; j < m; j++){
@@ -121,8 +131,8 @@ class Program{
             int y = 0;
             while (player.hp > 0){
                 // input
-                WriteLine(x+1 + " " + (y+1));
-                WriteLine(Deck.GetInstance().cards.Count);
+                WriteLine("Room x:"+(x+1) + " y:" + (y+1));
+                //WriteLine(Deck.GetInstance().cards.Count);
                 var input = ReadLine();
                 if (input == "show"){
                     player.ShowCards();
@@ -153,6 +163,7 @@ class Program{
             if (player.hp <= 0){
                 break;
             }
+            Input.ClearLevel(rooms);
             if (n==m){
                 n++;
             } else {

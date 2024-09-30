@@ -44,7 +44,7 @@ abstract public class MiniGames {
             enemy.cards.AddRange(Deck.GetInstance().GetCards(to-enemy.cards.Count));
         }
         List<Card> add_cards = Deck.GetInstance().GetCards(to-player.cards.Count);
-        if (add_cards.Count!=0){
+        if (add_cards.Count != 0){
             if (add_cards.Count==1)
                 WriteLine("You get 1 card:");
             else 
@@ -60,6 +60,19 @@ abstract public class MiniGames {
             WriteLine(table[i].rank+" of "+table[i].suit+" <== "+beat[i].rank+" of "+beat[i].suit);
         }
     } 
+    public static void MassiveDamage(List<Card> cards, Actor player, List<Actor> enemies, Actor safe){
+        if (safe == player){
+            foreach (Actor enemy in enemies){
+                enemy.GetDamage(cards,1);
+            }
+        } else {
+            player.GetDamage(cards,1);
+            foreach (Actor enemy in enemies){
+                if (enemy != safe)
+                    enemy.GetDamage(cards,1);
+            }
+        }
+    }
 }
 
 public class Fool: MiniGames {
@@ -119,22 +132,15 @@ public class Fool: MiniGames {
                             }
                         } 
                         if ((!flag1)&&(!flag2)) {
-                            WriteLine("Don't beat");
-                            player.GetDamage(table);
+                            WriteLine("You don't beat");
+                            player.GetDamage(table,2);
                             table.Clear();
                         }
                         if (flag1){
                             WriteLine("You beat cards");
                             table.AddRange(player.RemoveCards(input));
                             // choose enemy
-                            int num = 0;
-                            if (enemies.Count > 1){
-                                for (int i=0;i<enemies.Count;i++){
-                                    WriteLine(i+1+enemies[i].name);
-                                } Write("Choose enemy: ");
-                                num = Input.MultipleInput(enemies.Count)[0];
-                            }
-                            enemies[num].GetDamage(table);
+                            MassiveDamage(table, player, enemies, player);
                             table.Clear();
                             AddCardTo(player, enemies, 6);
                         } 
@@ -207,14 +213,14 @@ public class Fool: MiniGames {
                             WriteLine(enemy.name + " beat your cards");
                             ShowBeatCards(table,beat_cards);
                             table.AddRange(beat_cards);
-                            player.GetDamage(table);
+                            MassiveDamage(table, player, enemies, enemy);
                             Deck.GetInstance().RerurnCards(table);
                             table.Clear();
                         } else {
                             // if enemy can't beat the cards
                             WriteLine(enemy.name+" don't beat cards");
                             enemy.cards.AddRange(beat_cards);
-                            enemy.GetDamage(table);
+                            enemy.GetDamage(table,2);
                             Deck.GetInstance().RerurnCards(table);
                             table.Clear();
                         } AddCardTo(player, enemies, 6);

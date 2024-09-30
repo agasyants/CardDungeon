@@ -76,7 +76,13 @@ public class Chest{
             cards.Add(content_cards[i]);
         }
         RemoveContentCards(cards);
-        player.AddCards(cards);
+        player.cards.AddRange(cards);
+    }
+    public void ResetChest(){
+        Deck.GetInstance().RerurnCards(lock_cards);
+        lock_cards = [];
+        Deck.GetInstance().RerurnCards(content_cards);
+        content_cards = [];
     }
 }
 
@@ -95,7 +101,7 @@ public class Room{
             roomType = RoomType.Enemy;
             Actor enemy = new("Skeleton");
             enemy.armor = 0;
-            enemy.hp = 50;
+            enemy.hp = 80;
             enemies.Add(enemy);
             if (num==4) {
                 Actor enemy2 = new("Zombie");
@@ -189,7 +195,7 @@ public class Room{
                 WriteLine("You sacrifice all your cards to the altar");
                 int num = player.cards.Count;
                 Deck.GetInstance().RerurnCards(player.RemoveCards([]));
-                player.AddCards(Deck.GetInstance().GetCards(num-1));
+                player.cards.AddRange(Deck.GetInstance().GetCards(num-1));
             }
         } else {
             WriteLine("ERROR");
@@ -202,9 +208,19 @@ public class Loot{
     public bool health_potion = false;
     public bool armor_potion = false;
     public bool phenix_stone = false;
-    public Loot(int n){
+    public Loot(){
         Random rnd = new();
-        cards = Deck.GetInstance().GetCards(n);
+        int num = rnd.Next(0, 12);
+        if (num == 0 || num == 1){
+            health_potion = true;
+        } else if (num == 2 || num == 3){
+            armor_potion = true;
+        } else if (num == 4){
+            phenix_stone = true;
+        } else {
+
+            cards = Deck.GetInstance().GetCards(1);
+        }
     }
 }
 public class Hand{

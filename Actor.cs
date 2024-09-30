@@ -11,8 +11,8 @@ public class Actor(string name)
         else
             Console.WriteLine(name + " hp: " + hp + ", armor: " + armor);
     }
-    public void AddCards(List<Card> cards){
-        this.cards.AddRange(cards);
+    public void AddCards(int n){
+        this.cards.AddRange(Deck.GetInstance().GetCards(n));
     }
     public List<Card> GetCards(List<int> card_index){
         List<Card> result = [];
@@ -39,12 +39,15 @@ public class Actor(string name)
             Console.WriteLine(i+1 + ". " + cards[i].rank + " of " + cards[i].suit);
         }
     }
-    public void GetDamage(List<Card> cards){
+    public void GetDamage(List<Card> cards, int multiplier){
         int damage = 0;
         foreach (Card card in cards){
-            damage = damage + (int)card.rank + 2;
+            damage = damage + ((int)card.rank + 2)*multiplier;
         }
-        Console.WriteLine(name + " get " + damage + " damage");
+        if (multiplier==1)
+            Console.WriteLine(name + " get " + damage + " damage");
+        else
+            Console.WriteLine(name + " get " + damage + " damage (x" + multiplier + ")");
         if (armor > 0){
             armor -= damage;
             if (armor < 0){
