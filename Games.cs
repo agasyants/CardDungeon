@@ -68,7 +68,6 @@ public class Fool: MiniGames {
         // who first
         foreach (Actor enemy in enemies){
             enemy.cards = Deck.GetInstance().GetCards(6);
-            WriteLine(enemy.name);
         }
         int[] actors_min = new int[enemies.Count];
         foreach (Actor actor in enemies){
@@ -78,6 +77,8 @@ public class Fool: MiniGames {
             } actors_min[enemies.IndexOf(actor)] = ranks.Min();
         }
         int index = Array.IndexOf(actors_min, actors_min.Max());
+        if (index != 0)
+            PrintHP(enemies);
         // fight starts
         List<Card> table = [];
         while (player.hp > 0 && SumEnemiessHP(enemies)){
@@ -155,7 +156,7 @@ public class Fool: MiniGames {
                     // choose random card
                     var rnd = new Random();
                     int num = rnd.Next(0, enemy.cards.Count);
-                    WriteLine(enemy.name+" put "+enemy.cards[num].rank+" of "+enemy.cards[num].suit);
+                    WriteLine(enemy.name+" put "+enemy.cards[num].rank+" of "+enemy.cards[num].suit +" on the table");
                     table.Add(enemy.cards[num]);
                     enemy.cards.RemoveAt(num);
                     index = UpdateIndex(index, enemies.Count);

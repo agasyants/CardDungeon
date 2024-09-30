@@ -99,6 +99,7 @@ class Program{
         int n = 3;
         int m = 3;
         WriteLine("Trump: " + Deck.GetInstance().trump);
+        WriteLine();
         for (int level_number = 1; level_number < 15; level_number++)
         {
             player.armor = 50;

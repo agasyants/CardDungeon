@@ -6,7 +6,10 @@ public class Actor(string name)
     public string name = name;
     public List<Card> cards = [];
     public void PrintHP(){
-        Console.WriteLine(name + " hp: " + hp + ", armor: " + armor);
+        if (armor<=0)
+            Console.WriteLine(name + " hp: " + hp);
+        else
+            Console.WriteLine(name + " hp: " + hp + ", armor: " + armor);
     }
     public void AddCards(List<Card> cards){
         this.cards.AddRange(cards);

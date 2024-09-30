@@ -184,7 +184,7 @@ public class Room{
         } else if (roomType == RoomType.Altar){
             WriteLine("");
             WriteLine("You are in the altar room");
-            Write("Do you want to sacrifice all your cards to the altar?");
+            Write("Do you want to sacrifice all your cards to the altar? ");
             if (Input.BoolInput("yes", "no")){
                 WriteLine("You sacrifice all your cards to the altar");
                 int num = player.cards.Count;

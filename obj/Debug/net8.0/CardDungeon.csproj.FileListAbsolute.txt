@@ -12,3 +12,4 @@ d:\Save\C#\CardDungeon\obj\Debug\net8.0\refint\CardDungeon.dll
 d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.pdb
 D:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.genruntimeconfig.cache
 D:\Save\C#\CardDungeon\obj\Debug\net8.0\ref\CardDungeon.dll
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.sourcelink.json
