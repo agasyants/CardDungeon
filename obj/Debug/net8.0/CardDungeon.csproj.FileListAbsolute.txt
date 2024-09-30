@@ -1,0 +1,14 @@
+d:\Save\C#\CardDungeon\bin\Debug\net8.0\CardDungeon.exe
+D:\Save\C#\CardDungeon\bin\Debug\net8.0\CardDungeon.deps.json
+D:\Save\C#\CardDungeon\bin\Debug\net8.0\CardDungeon.runtimeconfig.json
+d:\Save\C#\CardDungeon\bin\Debug\net8.0\CardDungeon.dll
+d:\Save\C#\CardDungeon\bin\Debug\net8.0\CardDungeon.pdb
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.GeneratedMSBuildEditorConfig.editorconfig
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.AssemblyInfoInputs.cache
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.AssemblyInfo.cs
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.csproj.CoreCompileInputs.cache
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.dll
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\refint\CardDungeon.dll
+d:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.pdb
+D:\Save\C#\CardDungeon\obj\Debug\net8.0\CardDungeon.genruntimeconfig.cache
+D:\Save\C#\CardDungeon\obj\Debug\net8.0\ref\CardDungeon.dll
