@@ -32,21 +32,13 @@ public class Input{
         }
         var input = ReadLine();
     } 
-    public static string HighlightTrump(Suit suit){
-        string result = "";
-        if (suit == Deck.GetInstance().trump){
-            result = suit.ToString().ToUpper();
-        } else {
-            result = suit.ToString();
-        } return result;
-    }
     public static void ShowCards(string frase, List<Card> cards){
         if (cards.Count == 0){
             return;
         }
         WriteLine(frase);
         for (int i = 0; i < cards.Count; i++){
-            WriteLine(i+1 + ". " + cards[i].rank + " of " + HighlightTrump(cards[i].suit));
+            WriteLine(i+1 + ". " + cards[i].Print());
         }
     }
     public static bool IsBeat(List<Card> first, List<Card> second){
@@ -73,14 +65,17 @@ public class Input{
         List<int> result = new List<int>();
         bool flag = true;
         while (flag) {
-            Console.Write("Input cards: ");
+            Write("Input cards: ");
             result = new List<int>();
             flag = false;
-            var R = Console.ReadLine();
+            var R = ReadLine();
             if (R is null){
                 continue;
             }
             string[] input = R.Split(' ');
+            if (input[0]=="") {
+                return result;
+            }
             if (input.Length <= max_count) {
                 foreach (string i in input) {
                     if (int.TryParse(i, out int num)) {
@@ -131,14 +126,19 @@ class Program{
         Actor player = new("Player");
         player.cards = Deck.GetInstance().GetCards(6);
         Random rnd = new();
-        int n = 3;
-        int m = 3;
+        int s = 4;
+        WriteLine("show - show inventory");
+        WriteLine("test - test mode");
+        WriteLine("map - show map");
+        WriteLine("a, w, s, d - move");
         WriteLine("Trump: " + Deck.GetInstance().trump.ToString().ToUpper());
         WriteLine();
         for (int level_number = 1; level_number < 15; level_number++)
         {
             player.armor = 80;
             // genegating level
+            int n = rnd.Next(3, s);
+            int m = s - n + 2;
             Room[,] rooms = new Room[n, m];
             for (int i = 0; i < n; i++){
                 for (int j = 0; j < m; j++){
@@ -158,6 +158,7 @@ class Program{
             int x = 0;
             int y = 0;
             while (player.hp > 0){
+                WriteLine("Where we go?");
                 // input
                 if (Global.testing){
                     WriteLine("x "+(x+1) + " y " + (y+1));
@@ -201,11 +202,7 @@ class Program{
                 break;
             }
             Input.ClearLevel(rooms);
-            if (n==m){
-                n++;
-            } else {
-                m++;
-            }
-        } WriteLine("Game over");
+            s++;
+        } WriteLine("GAME OVER");
     }
 }

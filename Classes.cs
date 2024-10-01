@@ -7,6 +7,13 @@ namespace CardDungeon;
 public class Card(Rank rank, Suit suit) {
     public Rank rank = rank;
     public Suit suit = suit;
+    public string Print(){
+        string result = "<" + rank.ToString() +" of ";
+        if (suit == Deck.GetInstance().trump)
+            return result + suit.ToString().ToUpper() + ">";
+        else
+            return result + suit.ToString() + ">";
+    }
 }
 public sealed class Deck{ //singleton
     public static Deck instance = new();
@@ -21,12 +28,6 @@ public sealed class Deck{ //singleton
     public static Deck GetInstance(){
         instance ??= new Deck();
         return instance;
-    }
-    public void ShowInstance(){
-        foreach (Card card in cards){
-            WriteLine(card.rank + " " + card.suit);
-        }
-        WriteLine(cards.Count);
     }
     private Deck(){
         foreach (Suit suit in Enum.GetValues(typeof(Suit))){
@@ -48,7 +49,7 @@ public sealed class Deck{ //singleton
             result.Add(card);
         } return result;
     }
-    public void RerurnCards(List<Card> cards){
+    public void ReturnCards(List<Card> cards){
         foreach (Card card in cards){
             this.cards.Add(card);
         }
@@ -67,21 +68,25 @@ public class Chest{
     public void GetCards(Actor player){
         WriteLine("Cards in chest:");
         for (int i = 0; i < content_cards.Count; i++){
-            WriteLine("  " + content_cards[i].rank + " of " + content_cards[i].suit);
+            WriteLine("  " + content_cards[i].Print());
         }
         Write("What card do you want to get? ");
         var input = Input.MultipleInput(content_cards.Count);
-        List<Card> cards = [];
-        foreach (int i in input){
-            cards.Add(content_cards[i]);
+        if (input.Count == 0){
+            player.cards.AddRange(content_cards);
+            content_cards.Clear();
+        } else {
+            List<Card> cards = [];
+            foreach (int i in input)
+                cards.Add(content_cards[i]);
+            RemoveContentCards(cards);
+            player.cards.AddRange(cards);
         }
-        RemoveContentCards(cards);
-        player.cards.AddRange(cards);
     }
     public void ResetChest(){
-        Deck.GetInstance().RerurnCards(lock_cards);
+        Deck.GetInstance().ReturnCards(lock_cards);
         lock_cards = [];
-        Deck.GetInstance().RerurnCards(content_cards);
+        Deck.GetInstance().ReturnCards(content_cards);
         content_cards = [];
     }
 }
@@ -120,27 +125,39 @@ public class Room{
     }
   
     public bool EnterRoom(Actor player){
-        if (enemies.Count != 0){
-            WriteLine("");
-            WriteLine("There is enemy in this room");
-            game.StartGame(player, enemies);
+        if (roomType == RoomType.Enemy){
+            if (enemies.Count != 0){
+                WriteLine("");
+                WriteLine("There is enemy in this room");
+                game.StartGame(player, enemies);
+                if (player.hp <= 0){
+                    return true;
+                } else {
+                    WriteLine("You win!");
+                    player.cards.AddRange(Deck.GetInstance().GetCards(2));
+                    enemies.Clear();
+                }
+            } else {
+                WriteLine("");
+                WriteLine("Only traces of a heated battle remain here.");
+            }
         } else if (roomType == RoomType.Chest && chest != null){
             WriteLine("");
             if (chest.open == false){
                 WriteLine("There is the closed chest in this room");
                 Random rnd = new();
                 int num2 = rnd.Next(0, 6);
-                if (num2 < 3){
+                if (num2 < 3)
                     num2 = 1;
-                } else if (num2 >4){
+                else if (num2>4)
                     num2 = 3;
-                } else {
+                else
                     num2 = 2;
-                }
                 chest.lock_cards.AddRange(Deck.GetInstance().GetCards(num2));
                 Input.ShowCards("It closed with this cards:", chest.lock_cards);
-                WriteLine("Do you want to try to open it? ");
+                Write("Do you want to try to open it? ");
                 if (Input.BoolInput("yes","no")){
+                    WriteLine();
                     WriteLine("If you want to open it you have to beat every card");
                     player.ShowCards();
                     var card_input = Input.MultipleInput(player.cards.Count);
@@ -149,9 +166,9 @@ public class Room{
                         int num = rnd.Next(0, 3);
                         chest.content_cards.AddRange(Deck.GetInstance().GetCards(num+1));
                         chest.open = true;
-                        Deck.GetInstance().RerurnCards(chest.lock_cards);
+                        Deck.GetInstance().ReturnCards(chest.lock_cards);
                         chest.lock_cards.Clear();
-                        Deck.GetInstance().RerurnCards(player.RemoveCards(card_input));
+                        Deck.GetInstance().ReturnCards(player.RemoveCards(card_input));
                         chest.GetCards(player);
                     } else {
                         WriteLine("lose");
@@ -196,7 +213,7 @@ public class Room{
             if (Input.BoolInput("yes", "no")){
                 WriteLine("You sacrifice all your cards to the altar");
                 int num = player.cards.Count;
-                Deck.GetInstance().RerurnCards(player.RemoveCards([]));
+                Deck.GetInstance().ReturnCards(player.RemoveCards([]));
                 player.cards.AddRange(Deck.GetInstance().GetCards(num-1));
             }
         } else {

@@ -4,6 +4,9 @@ using static System.Console;
 abstract public class MiniGames {
     public abstract void StartGame(Actor player, List<Actor> enemies);
     public static bool CanPut(List<Card> cards){
+        if (cards.Count == 0){
+            return false;
+        }
         if (cards.Count == 1){
             return true;
         }
@@ -50,27 +53,14 @@ abstract public class MiniGames {
             else 
                 WriteLine("You get "+ add_cards.Count +" cards:");
             foreach (Card card in add_cards){
-                WriteLine(card.rank +" of "+ card.suit);
+                WriteLine(card.Print());
             }
             player.cards.AddRange(add_cards);
         }
     }
     public static void ShowBeatCards(List<Card> table, List<Card> beat){
         for (int i=0; i<table.Count; i++){
-            WriteLine(table[i].rank+" of "+table[i].suit+" <== "+beat[i].rank+" of "+beat[i].suit);
-        }
-    } 
-    public static void MassiveDamage(List<Card> cards, Actor player, List<Actor> enemies, Actor safe){
-        if (safe == player){
-            foreach (Actor enemy in enemies){
-                enemy.GetDamage(cards,1);
-            }
-        } else {
-            player.GetDamage(cards,1);
-            foreach (Actor enemy in enemies){
-                if (enemy != safe)
-                    enemy.GetDamage(cards,1);
-            }
+            WriteLine(table[i].Print() + " <== " + beat[i].Print());
         }
     }
 }
@@ -94,13 +84,17 @@ public class Fool: MiniGames {
         // fight starts
         List<Card> table = [];
         while (player.hp > 0 && SumEnemiessHP(enemies)){
+            if (Global.testing){
+                WriteLine(Deck.GetInstance().cards.Count);
+                WriteLine(index);
+            }
             // player turn
             if (index == 0){
                 // player attack
+                PrintHP(enemies);
+                player.PrintHP();
                 Input.ShowCards("Cards on the table:", table);
                 if (table.Count == 0){
-                    PrintHP(enemies);
-                    player.PrintHP();
                     Input.ProgramSays([]);
                     WriteLine("Your turn");
                     WriteLine("Your cards: ");
@@ -121,8 +115,13 @@ public class Fool: MiniGames {
                     int n = table.Count;
                     while (table.Count==n){
                         var input = Input.MultipleInput(player.cards.Count);
+                        WriteLine();
                         bool flag1 = Input.IsBeat(table, player.GetCards(input));
                         bool flag2 = CanAdd(player.GetCards(input),(int)table[0].rank);
+                        if (input.Count == 0){
+                            flag1 = false;
+                            flag2 = false;
+                        }
                         if (flag1 && flag2) {
                             Write("Beat cards or add cards? ");
                             if (Input.BoolInput("beat","add")){
@@ -133,14 +132,29 @@ public class Fool: MiniGames {
                         } 
                         if ((!flag1)&&(!flag2)) {
                             WriteLine("You don't beat");
-                            player.GetDamage(table,2);
-                            table.Clear();
+                            Deck.GetInstance().ReturnCards(table);
+                            if (!player.GetDamage(table,2)){
+                                table.Clear();
+                                return;
+                            } table.Clear();
+                            AddCardTo(player, enemies, 6);
                         }
                         if (flag1){
                             WriteLine("You beat cards");
                             table.AddRange(player.RemoveCards(input));
-                            // choose enemy
-                            MassiveDamage(table, player, enemies, player);
+                            Deck.GetInstance().ReturnCards(table);
+                            List<Actor> bin = [];
+                            foreach (Actor enemy in enemies){
+                                if (!enemy.GetDamage(table,1))
+                                    bin.Add(enemy);
+                            }
+                            foreach (Actor enemy in bin){
+                                enemies.Remove(enemy);
+                                index--;
+                            }
+                            if (enemies.Count == 0)
+                                return;
+                            bin.Clear();
                             table.Clear();
                             AddCardTo(player, enemies, 6);
                         } 
@@ -181,7 +195,6 @@ public class Fool: MiniGames {
                             flag = false;
                             WriteLine(enemy.name+" add "+enemy.cards[i].rank+" of "+enemy.cards[i].suit);
                             enemy.cards.RemoveAt(i);
-                            index = UpdateIndex(index, enemies.Count);
                         }
                     } 
                     // beat cards
@@ -215,37 +228,47 @@ public class Fool: MiniGames {
                         } 
                         if (flag) {
                             // if enemy can beat the cards
-                            WriteLine(enemy.name + " beat your cards");
+                            WriteLine(enemy.name + " beat cards");
                             ShowBeatCards(table,beat_cards);
                             table.AddRange(beat_cards);
-                            MassiveDamage(table, player, enemies, enemy);
-                            Deck.GetInstance().RerurnCards(table);
+                            Deck.GetInstance().ReturnCards(table);
+                            if (!player.GetDamage(table,1))
+                                return;
+                            List<Actor> bin = [];
+                            foreach (Actor e in enemies){
+                                if (enemy != e){
+                                    if (!e.GetDamage(table,1))
+                                        bin.Add(e);
+                                }
+                            }
+                            foreach (Actor e in bin){
+                                enemies.Remove(e);
+                                index--;
+                            }
+                            if (enemies.Count == 0)
+                                return;
+                            bin.Clear();
                             table.Clear();
                         } else {
                             // if enemy can't beat the cards
-                            WriteLine(enemy.name+" don't beat cards");
+                            WriteLine(enemy.name +" don't beat cards");
                             enemy.cards.AddRange(beat_cards);
-                            enemy.GetDamage(table,2);
-                            Deck.GetInstance().RerurnCards(table);
-                            table.Clear();
+                            Deck.GetInstance().ReturnCards(table);
+                            if (!enemy.GetDamage(table,2)){
+                                enemies.Remove(enemy);
+                                index--;
+                                if (enemies.Count == 0){
+                                    table.Clear();
+                                    return;
+                                }
+                            } table.Clear();
                         } AddCardTo(player, enemies, 6);
+                    } else {
+                        index = UpdateIndex(index, enemies.Count);
                     }
                 } Input.ProgramSays([]);
-            } 
-        if (player.hp <= 0)
-            WriteLine("You died");
-        else {
-            foreach (Actor enemy in enemies){
-                if (enemy.hp <= 0){
-                    WriteLine(enemy.name + " died");
-                    Deck.GetInstance().RerurnCards(enemy.cards);
-                    enemies.Remove(enemy);
-                    enemy.cards = [];
-                }
-            } 
+            }
         }
-        player.cards.AddRange(Deck.GetInstance().GetCards(2));
-        WriteLine("You win the fight!!!");
-        }
+        // ending
     }
 }

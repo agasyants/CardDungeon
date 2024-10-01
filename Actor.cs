@@ -4,6 +4,7 @@ public class Actor(string name)
     public int hp = 50;
     public int armor = 100;
     public string name = name;
+    public bool phenix_stone = false;
     public List<Card> cards = [];
     public void PrintHP(){
         if (armor<=0)
@@ -32,14 +33,18 @@ public class Actor(string name)
                 result.Add(cards[i]);
                 cards.RemoveAt(i);
             } 
-        }return result;
+        } return result;
     }
     public void ShowCards(){
         for (int i = 0; i < cards.Count; i++){
-            Console.WriteLine(i+1 + ". " + cards[i].rank + " of " + Input.HighlightTrump(cards[i].suit));
+            Console.WriteLine(i+1 + ". " + cards[i].Print());
         }
     }
-    public void GetDamage(List<Card> cards, int multiplier){
+    public void Death(){
+        Deck.GetInstance().ReturnCards(RemoveCards([]));
+        Console.WriteLine(name + " died");
+    }
+    public bool GetDamage(List<Card> cards, int multiplier){
         int damage = 0;
         foreach (Card card in cards){
             damage = damage + ((int)card.rank + 2)*multiplier;
@@ -57,5 +62,16 @@ public class Actor(string name)
         } else {
             hp -= damage;
         }
+        if (hp <= 0){
+            if (phenix_stone){
+                hp = 1;
+                phenix_stone = false;
+                Console.WriteLine("Phenix stone saved you");
+                Console.WriteLine("Your hp = 1");
+                return true;
+            }
+            Death();
+            return false;
+        } return true;
     }
 }
