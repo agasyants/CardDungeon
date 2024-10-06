@@ -1,3 +1,4 @@
+using System.CodeDom.Compiler;
 using System.ComponentModel;
 using System.Dynamic;
 using static System.Console;
@@ -59,35 +60,9 @@ public sealed class Deck{ //singleton
 public class Chest{
     public bool open = false;
     public List<Card> lock_cards = [];
-    public List<Card> content_cards = [];
-    public void RemoveContentCards(List<Card> cards){
-        foreach (Card card in cards){
-            content_cards.Remove(card);
-        }
-    }
-    public void GetCards(Actor player){
-        WriteLine("Cards in chest:");
-        for (int i = 0; i < content_cards.Count; i++){
-            WriteLine("  " + content_cards[i].Print());
-        }
-        Write("What card do you want to get? ");
-        var input = Input.MultipleInput(content_cards.Count);
-        if (input.Count == 0){
-            player.cards.AddRange(content_cards);
-            content_cards.Clear();
-        } else {
-            List<Card> cards = [];
-            foreach (int i in input)
-                cards.Add(content_cards[i]);
-            RemoveContentCards(cards);
-            player.cards.AddRange(cards);
-        }
-    }
     public void ResetChest(){
         Deck.GetInstance().ReturnCards(lock_cards);
         lock_cards = [];
-        Deck.GetInstance().ReturnCards(content_cards);
-        content_cards = [];
     }
 }
 
@@ -97,6 +72,7 @@ public class Room{
     public Chest? chest;
     public string map_tag = " ";
     private MiniGames game;
+    public Loot loot = new();
     public Room(MiniGames game){
         this.game = game;
         Random rnd = new();
@@ -107,13 +83,14 @@ public class Room{
         } else if (num >= 1 && num < 5){
             map_tag = "E";
             roomType = RoomType.Enemy;
-            Actor enemy = new("Skeleton");
-            enemy.armor = 0;
+            Actor enemy = new("Skeleton", 80, 0);
+            enemy.current_armor = 0;
             enemy.hp = 80;
             enemies.Add(enemy);
             if (num==4) {
-                Actor enemy2 = new("Zombie");
-                enemy2.armor = 0;
+                map_tag = "2";
+                Actor enemy2 = new("Zombie", 50, 0);
+                enemy2.current_armor = 0;
                 enemy2.hp = 50;
                 enemies.Add(enemy2);
             }
@@ -134,26 +111,32 @@ public class Room{
                     return true;
                 } else {
                     WriteLine("You win!");
-                    player.cards.AddRange(Deck.GetInstance().GetCards(2));
+                    loot.GenerateLoot();
+                    loot.UseLoot(player);
                     enemies.Clear();
                 }
             } else {
                 WriteLine("");
-                WriteLine("Only traces of a heated battle remain here.");
+                if (loot.IsEmpty)
+                    WriteLine("Only traces of a heated battle remain here.");
+                else
+                    loot.UseLoot(player);
             }
         } else if (roomType == RoomType.Chest && chest != null){
             WriteLine("");
             if (chest.open == false){
                 WriteLine("There is the closed chest in this room");
                 Random rnd = new();
-                int num2 = rnd.Next(0, 6);
-                if (num2 < 3)
-                    num2 = 1;
-                else if (num2>4)
-                    num2 = 3;
-                else
-                    num2 = 2;
-                chest.lock_cards.AddRange(Deck.GetInstance().GetCards(num2));
+                if (chest.lock_cards.Count == 0){
+                    int num2 = rnd.Next(0, 6);
+                    if (num2 < 3)
+                        num2 = 1;
+                    else if (num2>4)
+                        num2 = 3;
+                    else
+                        num2 = 2;
+                    chest.lock_cards.AddRange(Deck.GetInstance().GetCards(num2));
+                }
                 Input.ShowCards("It closed with this cards:", chest.lock_cards);
                 Write("Do you want to try to open it? ");
                 if (Input.BoolInput("yes","no")){
@@ -162,25 +145,25 @@ public class Room{
                     player.ShowCards();
                     var card_input = Input.MultipleInput(player.cards.Count);
                     if (Input.IsBeat(chest.lock_cards, player.GetCards(card_input))){
+                        WriteLine();
                         WriteLine("You open the chest!!!");
-                        int num = rnd.Next(0, 3);
-                        chest.content_cards.AddRange(Deck.GetInstance().GetCards(num+1));
+                        loot.GenerateLoot();
                         chest.open = true;
                         Deck.GetInstance().ReturnCards(chest.lock_cards);
                         chest.lock_cards.Clear();
                         Deck.GetInstance().ReturnCards(player.RemoveCards(card_input));
-                        chest.GetCards(player);
+                        loot.UseLoot(player);
                     } else {
-                        WriteLine("lose");
+                        WriteLine("You don't beat");
                         WriteLine("");
                     }
                 }
             } else {
-                if (chest.content_cards.Count == 0){
+                if (!loot.IsEmpty){
                     WriteLine("There is the empty chest in this room.");
                 } else {
                     WriteLine("There is the open chest in this room.");
-                    chest.GetCards(player);
+                    loot.UseLoot(player);
                 }
             }
         } else if (roomType == RoomType.End){
@@ -223,23 +206,84 @@ public class Room{
     }
 }
 public class Loot{
+    public bool IsEmpty = false;
     List<Card> cards = [];
     public bool health_potion = false;
-    public bool armor_potion = false;
+    public int armor = 0;
     public bool phenix_stone = false;
-    public Loot(){
+    public string[] possible_armor = ["Helmet", "Lats", "Cuirass", "Boots", "Leggings", "Bracers"];
+    public void GenerateLoot(){
         Random rnd = new();
         int num = rnd.Next(0, 12);
         if (num == 0 || num == 1){
             health_potion = true;
         } else if (num == 2 || num == 3){
-            armor_potion = true;
+            armor = 10 + rnd.Next(0,20);
         } else if (num == 4){
             phenix_stone = true;
         } else {
-
-            cards = Deck.GetInstance().GetCards(1);
+            int num2 = rnd.Next(0, 3);
+            if (num2 == 0)
+                cards = Deck.GetInstance().GetCards(1);
+            else if (num2 == 1)
+                cards = Deck.GetInstance().GetCards(2);
+            else if (num2 == 2)
+                cards = Deck.GetInstance().GetCards(3);
         }
+    }
+    public void UseLoot(Actor player){
+        WriteLine("Your loot is...");
+        if (health_potion){
+            WriteLine("Health potion!");
+            Write("Do you want to get it? ");
+            if (Input.BoolInput("yes", "no")){
+                player.health_potions++;
+            }
+        } else if (armor != 0){
+            Random rnd = new();
+            int num = rnd.Next(0, possible_armor.Length);
+            WriteLine(possible_armor[num] + "! (" + armor + " arm)");
+            Write("Do you want to get it? ");
+            if (Input.BoolInput("yes", "no")){
+                player.GetArmor(armor);
+            }
+        } else if (phenix_stone){
+            WriteLine("Phenix stone!");
+            if (player.phenix_stone){
+                WriteLine("But you already heave one, so you can't take it(");
+            } else{
+                Write("Do you want to get it? ");
+                if (Input.BoolInput("yes", "no")){
+                    player.phenix_stone = true;
+                }
+            }
+        } else if (cards.Count()>0){
+            WriteLine("Cards!");
+            for (int i = 0; i < cards.Count; i++){
+                WriteLine("  " + cards[i].Print());
+            }
+            Write("What card do you want to get? ");
+            var input = Input.MultipleInput(cards.Count);
+            if (input.Count == 0){
+                player.cards.AddRange(cards);
+                cards.Clear();
+            } else {
+                List<Card> cards = [];
+                foreach (int i in input)
+                    cards.Add(cards[i]);
+                cards.Clear();
+                player.cards.AddRange(cards);
+            }
+        } 
+        if (!health_potion && armor == 0 && phenix_stone == false && cards.Count == 0)
+            IsEmpty = true;
+    }
+    public void ClearLoot(){
+        health_potion = false;
+        armor = 0;
+        phenix_stone = false;
+        Deck.GetInstance().ReturnCards(cards);
+        cards.Clear();
     }
 }
 public class Hand{

@@ -15,15 +15,19 @@ public class Input{
         bool result = false;
         while (flag) {
             var input = ReadLine();
-            if (input == word_true){
-                result = true;
-                flag = false;
-            } else if (input == word_false){
-                result = false;
-                flag = false;
-            } else {
-                WriteLine("Wrong input");
+            if (input is not null){
+                input = input.ToString().ToLower();
+                if (input.Contains(word_true)){
+                    result = true;
+                    flag = false;
+                } else if (input.Contains(word_false)){
+                    result = false;
+                    flag = false;
+                } else {
+                    WriteLine("Wrong input");
+                }
             }
+            
         } return result;
     }
     public static void ProgramSays(List<string> strings){
@@ -123,26 +127,31 @@ public class Input{
 class Program{
     static void Main(string[] args){
         // starting game
-        Actor player = new("Player");
+        Actor player = new("Player", 50, 80);
         player.cards = Deck.GetInstance().GetCards(6);
         Random rnd = new();
         int s = 4;
         WriteLine("show - show inventory");
         WriteLine("test - test mode");
         WriteLine("map - show map");
+        WriteLine("heal - use health potion");
         WriteLine("a, w, s, d - move");
+        WriteLine("e - interaction");
         WriteLine("Trump: " + Deck.GetInstance().trump.ToString().ToUpper());
         WriteLine();
-        for (int level_number = 1; level_number < 15; level_number++)
+        for (int level_number = 1; level_number <= 10; level_number++)
         {
-            player.armor = 80;
+            player.current_armor = player.max_armor;
             // genegating level
             int n = rnd.Next(3, s);
             int m = s - n + 2;
             Room[,] rooms = new Room[n, m];
             for (int i = 0; i < n; i++){
                 for (int j = 0; j < m; j++){
-                    rooms[i, j] = new Room(new Fool());
+                    if (Global.testing)
+                        rooms[i, j] = new Room(new FoolImp());
+                    else
+                        rooms[i, j] = new Room(new Fool());
                 }
             }
             rooms[0, 0].roomType = RoomType.Start;
@@ -167,8 +176,16 @@ class Program{
                 var input = ReadLine();
                 if (input == "show"){
                     player.ShowCards();
+                    player.PrintHP();
                     WriteLine("");
                     continue;
+                } else if (input == "e") {
+                    if (rooms[x, y].EnterRoom(player))
+                        break;
+                    else
+                        continue;
+                } else if (input == "heal") {
+                    player.UseHeal();
                 } else if (input == "test") {
                     Global.testing = true;
                     continue;

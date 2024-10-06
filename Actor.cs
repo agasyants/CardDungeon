@@ -1,19 +1,45 @@
 namespace CardDungeon;
-public class Actor(string name)
-{
-    public int hp = 50;
-    public int armor = 100;
-    public string name = name;
+public class Actor {
+    public int hp;
+    public int max_hp;
+    public int max_armor;
+    public int current_armor;
+    public string name;
     public bool phenix_stone = false;
+    public int health_potions = 0;
     public List<Card> cards = [];
+    public Actor(string name, int hp, int armor){
+        this.name = name;
+        this.hp = hp;
+        this.max_hp = hp;
+        this.max_armor = armor;
+        this.current_armor = armor;
+    }
+    public void UseHeal(){
+        if (health_potions > 0){
+            health_potions--;
+            int heal = 20;
+            if (hp+heal > max_hp)
+                hp = max_hp;
+            else
+                hp += heal;
+            Console.WriteLine(name + " use health potion and heal " + heal + " hp");
+        } else {
+            Console.WriteLine("You have no health potions");
+        }
+    }
+    public void GetArmor(int armor){
+        current_armor += armor;
+        max_armor += armor;
+    }
     public void PrintHP(){
-        if (armor<=0)
+        if (current_armor<=0)
             Console.WriteLine(name + " hp: " + hp);
         else
-            Console.WriteLine(name + " hp: " + hp + ", armor: " + armor);
+            Console.WriteLine(name + " hp: " + hp + ", armor: " + current_armor);
     }
     public void AddCards(int n){
-        this.cards.AddRange(Deck.GetInstance().GetCards(n));
+        cards.AddRange(Deck.GetInstance().GetCards(n));
     }
     public List<Card> GetCards(List<int> card_index){
         List<Card> result = [];
@@ -39,6 +65,14 @@ public class Actor(string name)
         for (int i = 0; i < cards.Count; i++){
             Console.WriteLine(i+1 + ". " + cards[i].Print());
         }
+        if (phenix_stone)
+            Console.WriteLine("You have phenix stone");
+        if (health_potions > 0){
+            if (health_potions == 1)
+                Console.WriteLine("You have 1 health potion");
+            else
+                Console.WriteLine("You have " + health_potions + " health potions");
+        }
     }
     public void Death(){
         Deck.GetInstance().ReturnCards(RemoveCards([]));
@@ -53,11 +87,11 @@ public class Actor(string name)
             Console.WriteLine(name + " get " + damage + " damage");
         else
             Console.WriteLine(name + " get " + damage + " damage (x" + multiplier + ")");
-        if (armor > 0){
-            armor -= damage;
-            if (armor < 0){
-                hp += armor;
-                armor = 0;
+        if (current_armor > 0){
+            current_armor -= damage;
+            if (current_armor < 0){
+                hp += current_armor;
+                current_armor = 0;
             }
         } else {
             hp -= damage;
