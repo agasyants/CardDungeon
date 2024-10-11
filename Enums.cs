@@ -22,16 +22,3 @@ public enum Rank{
     King,
     Ace,
 }
-
-public enum RoomType{
-    Start,
-    End,
-    Shop,
-    Trap,
-    Boss,
-    Empty,
-    Enemy,
-    Chest,
-    NotRoom,
-    Altar
-}

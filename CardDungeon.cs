@@ -8,9 +8,8 @@ namespace CardDungeon;
 public static class Global{
     public static bool testing = false;
 }
-
 public class Input{
-    public static bool BoolInput(string word_true, string word_false){
+    public static bool BoolInput(string word_true, string word_false, Player player){
         bool flag = true;
         bool result = false;
         while (flag) {
@@ -30,11 +29,11 @@ public class Input{
             
         } return result;
     }
-    public static void ProgramSays(List<string> strings){
+    public static void ProgramSays(List<string> strings, Player player){
         foreach (string str in strings) {
             WriteLine(str);
         }
-        var input = ReadLine();
+        var input = In(player);
     } 
     public static void ShowCards(string frase, List<Card> cards){
         if (cards.Count == 0){
@@ -65,14 +64,14 @@ public class Input{
             return false;
         }
     }
-    public static List<int> MultipleInput(int max_count) {
+    public static List<int> MultipleInput(int max_count, Player player) {
         List<int> result = new List<int>();
         bool flag = true;
         while (flag) {
             Write("Input cards: ");
             result = new List<int>();
             flag = false;
-            var R = ReadLine();
+            var R = In(player);
             if (R is null){
                 continue;
             }
@@ -100,126 +99,112 @@ public class Input{
             }
         } return result;
     }
-    public static void ClearLevel(Room[,] rooms){
-        for (int i = 0; i < rooms.GetLength(0); i++){
-            for (int j = 0; j < rooms.GetLength(1); j++){
-                Chest? chest = rooms[i, j].chest;
-                if (chest != null){
-                    chest.ResetChest();
-                }
-            }
+    public static bool MovementInput(Player player, Level level){
+        WriteLine("Where we go?");
+        // input
+        if (Global.testing){
+            WriteLine("x "+(player.x+1) + " y " + (player.y+1));
+            WriteLine(Deck.GetInstance().cards.Count);
         }
+        var input = In(player);
+        if (input == "e") {
+            return false;
+        } else if (input == ":D") {
+            return true;
+        } else if (input == "map") {
+            level.ShowMap(player.x,player.y);
+            return true;
+        } else if (input == "a" && player.x > 0) {
+            player.x--;
+        } else if (input == "d" && player.x < level.rooms.GetLength(0) - 1) {
+            player.x++;
+        } else if (input == "w" && player.y < level.rooms.GetLength(1) - 1) {
+            player.y++;
+        } else if (input == "s" && player.y > 0) {
+            player.y--;
+        } else if (input != "a" && input != "w" && input != "s" && input != "d"){
+            WriteLine("");
+            WriteLine("Wrong input");
+            return true;
+        } else {
+            WriteLine("");
+            WriteLine("Wall");
+            return true;
+        } 
+        return false;
     }
-    public static void ShowLevel(Room[,] rooms, int x, int y){
-        for (int i = rooms.GetLength(1)-1; i >= 0; i--){
-            string output = "";
-            for (int j = 0; j < rooms.GetLength(0); j++){
-                if (j == x && i == y){
-                    output += "I ";
-                } else {
-                    output += rooms[j, i].map_tag + " ";
-                }
-            } 
-            WriteLine(output);
-        }
+    public static string In(Player player){
+        string input = "";
+        while (true){
+            input = ReadLine() ?? "";
+            if (input == "show"){
+                player.ShowInventory();
+                player.PrintHP();
+                WriteLine("");
+            } if (input == "exit") {
+                player.hp = 0;
+                return ":D";
+            } else if (input == "heal") {
+                player.UseHeal();
+            } else if (input == "test") {
+                Global.testing = true;
+            } else {
+                break;
+            }
+        } return input;
     }
 }
 class Program{
     static void Main(string[] args){
         // starting game
-        Actor player = new("Player", 50, 80);
+        Player player = new("Player", 50, 80);
         player.cards = Deck.GetInstance().GetCards(6);
-        Random rnd = new();
-        int s = 4;
+        while (true){
+            Game(player);
+            if (player.hp <= 0){
+                WriteLine("GAME OVER");
+                WriteLine("Do you want to restart?");
+                if (Input.BoolInput("yes", "no", player)){
+                    player.hp = player.max_hp;
+                    player.cards = Deck.GetInstance().GetCards(6);
+                } else { 
+                    break;
+                }
+            } else {
+                WriteLine("You've completed the game! Congratulations!");
+            }
+        }
+        
+    }
+    static void Game(Player player){
+        // game
         WriteLine("show - show inventory");
         WriteLine("test - test mode");
         WriteLine("map - show map");
         WriteLine("heal - use health potion");
+        WriteLine("exit - exit game");
         WriteLine("a, w, s, d - move");
         WriteLine("e - interaction");
-        WriteLine("Trump: " + Deck.GetInstance().trump.ToString().ToUpper());
-        WriteLine();
+        Input.ProgramSays([], player);
         for (int level_number = 1; level_number <= 10; level_number++)
         {
             player.current_armor = player.max_armor;
+            if (level_number % 5 == 0)
+                Deck.GetInstance().MakeTrump();
             // genegating level
-            int n = rnd.Next(3, s);
-            int m = s - n + 2;
-            Room[,] rooms = new Room[n, m];
-            for (int i = 0; i < n; i++){
-                for (int j = 0; j < m; j++){
-                    if (Global.testing)
-                        rooms[i, j] = new Room(new FoolImp());
-                    else
-                        rooms[i, j] = new Room(new Fool());
-                }
-            }
-            rooms[0, 0].roomType = RoomType.Start;
-            rooms[0, 0].map_tag = "S";
-            int end_x = rnd.Next(0, n-1) + 1;
-            int end_y = rnd.Next(m-end_x, m);
-            rooms[end_x, end_y].roomType = RoomType.End;
-            rooms[end_x, end_y].enemies.Clear();
-            rooms[end_x, end_y].chest = null;
-            rooms[end_x, end_y].map_tag = "x";
-            WriteLine(level_number + " level");
-            WriteLine("You are in the start room");
-            int x = 0;
-            int y = 0;
+            player.x = 0;
+            player.y = 0;
+            Level level = new(player, level_number);
             while (player.hp > 0){
-                WriteLine("Where we go?");
-                // input
-                if (Global.testing){
-                    WriteLine("x "+(x+1) + " y " + (y+1));
-                    WriteLine(Deck.GetInstance().cards.Count);
-                }
-                var input = ReadLine();
-                if (input == "show"){
-                    player.ShowCards();
-                    player.PrintHP();
-                    WriteLine("");
+                if (Input.MovementInput(player, level))
                     continue;
-                } else if (input == "e") {
-                    if (rooms[x, y].EnterRoom(player))
-                        break;
-                    else
-                        continue;
-                } else if (input == "heal") {
-                    player.UseHeal();
-                } else if (input == "test") {
-                    Global.testing = true;
-                    continue;
-                } else if (input == "map") {
-                    Input.ShowLevel(rooms, x, y);
-                    continue;
-                } else if (input == "a" && x > 0) {
-                    x--;
-                } else if (input == "d" && x < n - 1) {
-                    x++;
-                } else if (input == "w" && y < m - 1) {
-                    y++;
-                } else if (input == "s" && y > 0) {
-                    y--;
-                } else if (input != "a" && input != "w" && input != "s" && input != "d"){
-                    WriteLine("");
-                    WriteLine("...");
-                    continue;
-                } else {
-                    WriteLine("");
-                    WriteLine("Wall");
-                    continue;
-                }
-                // cheking room
-                if (rooms[x, y].EnterRoom(player)) {
-                    break;
-                }
+                level.EnterRoom(player);
             }
+            if (player.hp <= 0)
+                return;
             // update level
-            if (player.hp <= 0){
-                break;
-            }
-            Input.ClearLevel(rooms);
-            s++;
-        } WriteLine("GAME OVER");
+            level.Clear();
+            level.level_size++;
+        }
     }
 }
