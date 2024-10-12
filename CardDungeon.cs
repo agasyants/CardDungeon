@@ -103,25 +103,26 @@ public class Input{
         WriteLine("Where we go?");
         // input
         if (Global.testing){
-            WriteLine("x "+(player.x+1) + " y " + (player.y+1));
+            WriteLine("x "+(level.x+1) + " y " + (level.y+1));
             WriteLine(Deck.GetInstance().cards.Count);
         }
         var input = In(player);
         if (input == "e") {
             return false;
-        } else if (input == ":D") {
+        } else if (input == "exit") {
+            player.hp = 0;
             return true;
         } else if (input == "map") {
-            level.ShowMap(player.x,player.y);
+            level.ShowMap(level.x,level.y);
             return true;
-        } else if (input == "a" && player.x > 0) {
-            player.x--;
-        } else if (input == "d" && player.x < level.rooms.GetLength(0) - 1) {
-            player.x++;
-        } else if (input == "w" && player.y < level.rooms.GetLength(1) - 1) {
-            player.y++;
-        } else if (input == "s" && player.y > 0) {
-            player.y--;
+        } else if (input == "a" && level.x > 0) {
+            level.x--;
+        } else if (input == "d" && level.x < level.rooms.GetLength(0) - 1) {
+            level.x++;
+        } else if (input == "w" && level.y < level.rooms.GetLength(1) - 1) {
+            level.y++;
+        } else if (input == "s" && level.y > 0) {
+            level.y--;
         } else if (input != "a" && input != "w" && input != "s" && input != "d"){
             WriteLine("");
             WriteLine("Wrong input");
@@ -141,9 +142,6 @@ public class Input{
                 player.ShowInventory();
                 player.PrintHP();
                 WriteLine("");
-            } if (input == "exit") {
-                player.hp = 0;
-                return ":D";
             } else if (input == "heal") {
                 player.UseHeal();
             } else if (input == "test") {
@@ -158,15 +156,13 @@ class Program{
     static void Main(string[] args){
         // starting game
         Player player = new("Player", 50, 80);
-        player.cards = Deck.GetInstance().GetCards(6);
         while (true){
             Game(player);
             if (player.hp <= 0){
                 WriteLine("GAME OVER");
                 WriteLine("Do you want to restart?");
                 if (Input.BoolInput("yes", "no", player)){
-                    player.hp = player.max_hp;
-                    player.cards = Deck.GetInstance().GetCards(6);
+                    player = new("Player", 50, 80);
                 } else { 
                     break;
                 }
@@ -192,8 +188,6 @@ class Program{
             if (level_number % 5 == 0)
                 Deck.GetInstance().MakeTrump();
             // genegating level
-            player.x = 0;
-            player.y = 0;
             Level level = new(player, level_number);
             while (player.hp > 0){
                 if (Input.MovementInput(player, level))

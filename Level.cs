@@ -4,6 +4,8 @@ namespace CardDungeon;
 
 public class Level{
     public  Room[,] rooms;
+    public int x = 0;
+    public int y = 0;
     public int level_number;
     readonly Random rnd = new();
     public int level_size = 4;
@@ -83,7 +85,7 @@ public class Level{
         }
     }
     public bool EnterRoom(Player player){
-        return rooms[player.x, player.y].EnterRoom(player);
+        return rooms[x,y].EnterRoom(player);
     }
     public void Clear(){
         for (int i = 0; i < rooms.GetLength(0); i++){

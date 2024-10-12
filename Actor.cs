@@ -75,11 +75,11 @@ public class Actor {
 }
 
 public class Player : Actor {
-    public int x = 0;
-    public int y = 0;
     public bool phenix_stone = false;
     public int health_potions = 0;
-    public Player(string name, int hp, int armor) : base(name, hp, armor){}
+    public Player(string name, int hp, int armor) : base(name, hp, armor){
+        cards = Deck.GetInstance().GetCards(6);
+    }
     public void AddCards(List<Card> add_cards){
         if (add_cards.Count != 0){
             if (add_cards.Count==1)
@@ -93,13 +93,14 @@ public class Player : Actor {
         }
     }
     public override void Death(){
-        Deck.GetInstance().ReturnCards(RemoveCards([]));
         Console.WriteLine("You died");
         if (phenix_stone){
                 hp = 1;
             phenix_stone = false;
             Console.WriteLine("Phenix stone saved you");
             Console.WriteLine("Your hp = 1");
+        } else{
+            Deck.GetInstance().ReturnCards(RemoveCards([]));
         }
     }
     public void ShowInventory(){
