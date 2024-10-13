@@ -15,9 +15,9 @@ public class Actor {
     }
     public void PrintHP(){
         if (current_armor<=0)
-            Console.WriteLine(name + " hp: " + hp);
+            Console.WriteLine($"{name} hp: {hp}");
         else
-            Console.WriteLine(name + " hp: " + hp + ", armor: " + current_armor);
+            Console.WriteLine($"{name} hp: {hp}, armor {current_armor}");
     }
     public List<Card> GetCards(List<int> card_index){
         List<Card> result = [];
@@ -57,7 +57,7 @@ public class Actor {
         if (multiplier==1)
             Console.WriteLine(name + " get " + damage + " damage");
         else
-            Console.WriteLine(name + " get " + damage + " damage (x" + multiplier + ")");
+            Console.WriteLine($"{name} get {damage} damage (x{multiplier})");
         if (current_armor > 0){
             current_armor -= damage;
             if (current_armor < 0){
@@ -85,7 +85,7 @@ public class Player : Actor {
             if (add_cards.Count==1)
                 Console.WriteLine("You get 1 card:");
             else 
-                Console.WriteLine("You get "+ add_cards.Count +" cards:");
+                Console.WriteLine($"You get {add_cards.Count} cards:");
             foreach (Card card in add_cards){
                 Console.WriteLine(card.Print());
             }
@@ -111,7 +111,7 @@ public class Player : Actor {
             if (health_potions == 1)
                 Console.WriteLine("You have 1 health potion");
             else
-                Console.WriteLine("You have " + health_potions + " health potions");
+                Console.WriteLine($"You have {health_potions} health potions");
         }
     }
     public void UseHeal(){
@@ -122,7 +122,7 @@ public class Player : Actor {
                 hp = max_hp;
             else
                 hp += heal;
-            Console.WriteLine(name + " use health potion and heal " + heal + " hp");
+            Console.WriteLine($"{name} use health potion and heal {heal} hp");
         } else {
             Console.WriteLine("You have no health potions");
         }

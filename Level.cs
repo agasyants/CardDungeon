@@ -36,7 +36,7 @@ public class Level{
             x = rnd.Next(0, n);
             y = rnd.Next(0, m);
             if (rooms[x, y] is EmptyRoom){
-                rooms[x, y] = new AltarRoom();
+                rooms[x, y] = new AltarRoom(this);
                 break;
             }
         }
@@ -64,6 +64,18 @@ public class Level{
                 y = rnd.Next(0, m);
                 if (rooms[x, y] is EmptyRoom){
                     rooms[x, y] = new ChestRoom();
+                    break;
+                }
+            }
+        }
+        // map room
+        count = rnd.Next(0, 2);
+        for (int i = 0; i < count; i++){
+            while (true){
+                x = rnd.Next(0, n);
+                y = rnd.Next(0, m);
+                if (rooms[x, y] is EmptyRoom){
+                    rooms[x, y] = new MapRoom(this);
                     break;
                 }
             }
@@ -161,8 +173,10 @@ public class EnemyRoom : Room {
 
 public class AltarRoom : Room {
     public Loot loot = new();
-    public AltarRoom(){
+    private readonly Room[,] rooms;
+    public AltarRoom(Level level){
         map_tag = "A";
+        rooms = level.rooms;
     }
     public override bool _EnterRoom(Player player){
         WriteLine("");
@@ -173,7 +187,17 @@ public class AltarRoom : Room {
             int num = player.cards.Count;
             Deck.GetInstance().ReturnCards(player.RemoveCards([]));
             player.cards.AddRange(Deck.GetInstance().GetCards(num-1));
-        } return false;
+        } 
+        for (int i = 0; i < rooms.GetLength(0); i++){
+            for (int j = 0; j < rooms.GetLength(1); j++){
+                if (rooms[i, j] is EndRoom){
+                    WriteLine("The goddess showed your way");
+                    rooms[i,j].visited = true;
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 }
 
@@ -270,13 +294,22 @@ public class EmptyRoom : Room {
 }
 
 public class MapRoom : Room {
-    public MapRoom(){
+    private readonly Room[,] rooms;
+    public MapRoom(Level level){
         map_tag = "M";
+        rooms = level.rooms;
     }
     public override bool _EnterRoom(Player player){
         WriteLine("");
         WriteLine("You are in the map room");
-
+        Write("Do you want to fill the gaps in the map? ");
+        if (Input.BoolInput("yes","no", player)){
+            for (int i = 0; i < rooms.GetLength(0); i++){
+                for (int j = 0; j < rooms.GetLength(1); j++){
+                    rooms[i,j].visited = true;
+                }
+            }
+        }
         return false;
     }
 }

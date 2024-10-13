@@ -201,7 +201,7 @@ public class Fool: MiniGames {
                                 n = rnd.Next(2, n+1);
                                 for (int j = 0; j < n; j++){
                                     int num = enemy.cards.FindIndex(x => (int)x.rank == ranks[i]);
-                                    WriteLine(enemy.name+" put "+ enemy.cards[num].Print() +" on the table");
+                                    WriteLine($"{enemy.name} put {enemy.cards[num].Print()} on the table");
                                     table.Add(enemy.cards[num]);
                                     enemy.cards.RemoveAt(num);     
                                 } break;                       
@@ -211,7 +211,7 @@ public class Fool: MiniGames {
                         // choose random card
                         var rnd = new Random();
                         int num = rnd.Next(0, enemy.cards.Count);
-                        WriteLine(enemy.name+" put "+enemy.cards[num].Print() +" on the table");
+                        WriteLine($"{enemy.name} put {enemy.cards[num].Print()} on the table");
                         table.Add(enemy.cards[num]);
                         enemy.cards.RemoveAt(num);
                     }
@@ -225,7 +225,7 @@ public class Fool: MiniGames {
                         if ((int)enemy.cards[i].rank == num){
                             table.Add(enemy.cards[i]);
                             flag = false;
-                            WriteLine(enemy.name+" add "+enemy.cards[i].rank+" of "+enemy.cards[i].suit);
+                            WriteLine($"{enemy.name} add {enemy.cards[i].Print()}");
                             enemy.cards.RemoveAt(i);
                         }
                     } 
@@ -342,7 +342,7 @@ public class TO: MiniGames {
                 }
                 int num = rnd.Next(0, enemy.cards.Count);
                 Card put_card = enemy.cards[num];
-                WriteLine(enemy.name + " put " + put_card.Print() + " on the table");
+                WriteLine($"{enemy.name} put {put_card.Print()} on the table");
                 table.Add(put_card);
                 enemy.cards.RemoveAt(num);
             }

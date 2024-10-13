@@ -103,7 +103,7 @@ public class Input{
         WriteLine("Where we go?");
         // input
         if (Global.testing){
-            WriteLine("x "+(level.x+1) + " y " + (level.y+1));
+            WriteLine($"x {level.x+1} y {level.y+1}");
             WriteLine(Deck.GetInstance().cards.Count);
         }
         var input = In(player);
@@ -151,11 +151,30 @@ public class Input{
             }
         } return input;
     }
+    // keyInput
+    // Console.Key
+    public static void StartFrase(){
+        WriteLine("show - show inventory");
+        WriteLine("test - test mode");
+        WriteLine("map - show map");
+        WriteLine("heal - use health potion");
+        WriteLine("exit - exit game");
+        WriteLine("a, w, s, d - move");
+        WriteLine("e - interaction");
+    }
+    public static string InputName(){
+        string name = ReadLine() ?? "Player";
+        if (name == ""){
+            name = "Player";
+        } return name;
+    }
 }
 class Program{
     static void Main(string[] args){
         // starting game
-        Player player = new("Player", 50, 80);
+        WriteLine("Welcome to CardDungeon");
+        Write("What's your name? ");
+        Player player = new(Input.InputName(), 50, 80);
         while (true){
             Game(player);
             if (player.hp <= 0){
@@ -174,14 +193,7 @@ class Program{
     }
     static void Game(Player player){
         // game
-        WriteLine("show - show inventory");
-        WriteLine("test - test mode");
-        WriteLine("map - show map");
-        WriteLine("heal - use health potion");
-        WriteLine("exit - exit game");
-        WriteLine("a, w, s, d - move");
-        WriteLine("e - interaction");
-        Input.ProgramSays([], player);
+        Input.StartFrase();
         for (int level_number = 1; level_number <= 10; level_number++)
         {
             player.current_armor = player.max_armor;
