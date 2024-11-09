@@ -204,7 +204,9 @@ class Program{
             while (player.hp > 0){
                 if (Input.MovementInput(player, level))
                     continue;
-                level.EnterRoom(player);
+                if (level.EnterRoom(player)){
+                    break;
+                }
             }
             if (player.hp <= 0)
                 return;

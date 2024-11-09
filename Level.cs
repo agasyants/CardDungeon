@@ -10,6 +10,7 @@ public class Level{
     readonly Random rnd = new();
     public int level_size = 4;
     public Level(Player player, int level_number){
+        level_size = level_number + 3;
         int n = rnd.Next(3, level_size);
         int m = level_size - n + 2;
         rooms = new Room[n, m];
@@ -187,16 +188,16 @@ public class AltarRoom : Room {
             int num = player.cards.Count;
             Deck.GetInstance().ReturnCards(player.RemoveCards([]));
             player.cards.AddRange(Deck.GetInstance().GetCards(num-1));
-        } 
-        for (int i = 0; i < rooms.GetLength(0); i++){
-            for (int j = 0; j < rooms.GetLength(1); j++){
-                if (rooms[i, j] is EndRoom){
-                    WriteLine("The goddess showed your way");
-                    rooms[i,j].visited = true;
-                    return false;
+            for (int i = 0; i < rooms.GetLength(0); i++){
+                for (int j = 0; j < rooms.GetLength(1); j++){
+                    if (rooms[i, j] is EndRoom){
+                        WriteLine("The goddess showed your way");
+                        rooms[i,j].visited = true;
+                        return false;
+                    }
                 }
             }
-        }
+        } 
         return false;
     }
 }
